@@ -33,4 +33,4 @@ env:  ##@Environment Create .env file with variables
 	cat example.env > .env
 
 run:
-	python3 __main__.py
+	uv run python __main__.py
