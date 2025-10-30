@@ -20,3 +20,5 @@ class DefaultSettings(BaseSettings):
 
     APP_PORT: str = environ.get("APP_PORT", 8080)
     AIRFLOW_PORT: str = environ.get("AIRFLOW_PORT", 8081)
+    HDFS_WEB_PORT: str = environ.get("HDFS_WEB_PORT", 9870)
+    HDFS_PORT: str = environ.get("HDFS_PORT", 9000)

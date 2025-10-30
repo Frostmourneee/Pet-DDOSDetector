@@ -91,7 +91,7 @@ def train_models():
     metrics_df = pd.DataFrame(results)
     metrics_df.to_csv(f"{models_path}/training_metrics.csv", index=False)
 
-    print("Training completed! Metrics:")
+    print("Тренировка моделей окончена! Метрики:")
     print(metrics_df)
 
     return results
