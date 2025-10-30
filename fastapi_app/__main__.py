@@ -1,10 +1,11 @@
-from fastapi import FastAPI
-from uvicorn import run
-from fastapi.middleware.cors import CORSMiddleware
 from urllib.parse import urlparse
 
-from fastapi_app.config.utils import get_settings
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from uvicorn import run
+
 from fastapi_app.config.default import DefaultSettings
+from fastapi_app.config.utils import get_settings
 from fastapi_app.server.handlers import list_of_routes
 
 

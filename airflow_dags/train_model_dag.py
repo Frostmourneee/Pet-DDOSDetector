@@ -1,6 +1,8 @@
 from datetime import datetime
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+
 from ml_core.train import train_models
 
 default_args = {

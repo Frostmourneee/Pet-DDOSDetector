@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class PredictRequest(BaseModel):
     age: int = Field(..., description="Возраст человека",)
     workclass: str = Field(..., description="Категория рабочего класса")

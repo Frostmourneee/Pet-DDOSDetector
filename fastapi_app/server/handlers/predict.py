@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
-from ml_core.predict import predict, are_models_loaded, load_models
+
 from fastapi_app.server.schemas.predict import PredictRequest, PredictResponse
+from ml_core.predict import are_models_loaded, load_models, predict
 
 api_router = APIRouter(tags=["Prediction"])
 

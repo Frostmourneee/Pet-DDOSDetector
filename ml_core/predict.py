@@ -1,4 +1,5 @@
 import pandas as pd
+
 from storage import get_storage_client
 
 MODELS = {}

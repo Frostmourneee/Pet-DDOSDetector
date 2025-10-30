@@ -1,8 +1,9 @@
-from hdfs import InsecureClient
-import pandas as pd
-import tempfile
 import os
+import tempfile
+
 import joblib
+import pandas as pd
+from hdfs import InsecureClient
 from hdfs.util import HdfsError
 
 
