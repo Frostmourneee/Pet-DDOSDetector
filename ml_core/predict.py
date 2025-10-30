@@ -1,5 +1,5 @@
-import joblib
 import pandas as pd
+from storage import get_storage_client
 
 MODELS = {}
 PREPROCESSOR = None
@@ -15,13 +15,14 @@ def load_models():
         return True
 
     try:
-        models_path = "/ml_core/trained_models"
-        PREPROCESSOR = joblib.load(f"{models_path}/preprocessor.pkl")
+        storage = get_storage_client()
+        models_hdfs_path = "/user/airflow/models"
+        PREPROCESSOR = storage.read_joblib(f"{models_hdfs_path}/preprocessor.pkl")
 
         model_names = ["Logistic Regression", "Random Forest", "XGBoost"]
         for name in model_names:
             filename = name.replace(' ', '_').lower() + "_model.pkl"
-            MODELS[name] = joblib.load(f"{models_path}/{filename}")
+            MODELS[name] = storage.read_joblib(f"{models_hdfs_path}/{filename}")
 
         MODELS_LOADED = True
         print("Модели успешно загружены")

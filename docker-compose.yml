@@ -28,18 +28,23 @@ services:
       - .env
     volumes:
       - ./ml_core:/ml_core
+    depends_on:
+      - hadoop
 
   hadoop:
-    image: harisekhon/hadoop:2.8
+    build:
+      context: .
+      dockerfile: Dockerfile.hadoop
     container_name: hadoop
     ports:
-      - "${HDFS_WEB_PORT}:50070"  # Web UI
-      - "${HDFS_PORT}:9000"       # HDFS
-      - "8042:8042"               # Node Manager
+      - "${HDFS_WEB_PORT}:50070"
+      - "${HDFS_PORT}:9000"
+      - "${HDFS_NODE_MANAGER_PORT}:8042"
     environment:
       - HADOOP_HEAPSIZE=512
+      - FORMAT_NAMENODE=false
     volumes:
-      - hadoop_data:/hadoop/dfs/
+      - hadoop_data:/tmp/hadoop-root/dfs/
 
 volumes:
   hadoop_data:

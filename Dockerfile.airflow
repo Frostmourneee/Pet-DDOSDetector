@@ -8,4 +8,6 @@ COPY requirements_airflow.txt .
 RUN pip install --no-cache-dir -r requirements_airflow.txt
 
 COPY ml_core/ ./ml_core/
+COPY storage/ ./storage/
+
 ENV PYTHONPATH=/opt/airflow:$PYTHONPATH

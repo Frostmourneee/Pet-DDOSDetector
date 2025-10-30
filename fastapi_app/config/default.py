@@ -2,7 +2,6 @@ from os import environ
 
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
-from typing import Optional
 
 load_dotenv()
 
@@ -22,3 +21,4 @@ class DefaultSettings(BaseSettings):
     AIRFLOW_PORT: str = environ.get("AIRFLOW_PORT", 8081)
     HDFS_WEB_PORT: str = environ.get("HDFS_WEB_PORT", 9870)
     HDFS_PORT: str = environ.get("HDFS_PORT", 9000)
+    HDFS_NODE_MANAGER_PORT: str = environ.get("HDFS_NODE_MANAGER_PORT", 8042)

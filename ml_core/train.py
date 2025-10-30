@@ -8,24 +8,47 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from xgboost import XGBClassifier
-import joblib
-import os
+from storage import get_storage_client
 
+
+def get_df():
+    """Загрузка датасета из HDFS или скачивание из источника"""
+    storage = get_storage_client()
+    hdfs_path = "/user/airflow/datasets/adult_income/adult.data"
+
+    if storage.file_exists(hdfs_path):
+        return storage.read_csv(hdfs_path)
+    else:
+        url = "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data"
+        column_names = [
+            'age', 'workclass', 'fnlwgt', 'education', 'education-num',
+            'marital-status', 'occupation', 'relationship', 'race', 'sex',
+            'capital-gain', 'capital-loss', 'hours-per-week', 'native-country', 'income'
+        ]
+        df = pd.read_csv(url, header=None, names=column_names, na_values=' ?', skipinitialspace=True)
+
+        storage.write_csv(df, hdfs_path)
+
+        return df
 
 def train_models():
     """Основная функция обучения моделей"""
     RANDOM_STATE = 42
 
-    os.makedirs("/opt/airflow/ml_core/trained_models", exist_ok=True)
-    models_path = "/opt/airflow/ml_core/trained_models"
+    storage = get_storage_client()
+    models_hdfs_path = "/user/airflow/models"
+    if storage.file_exists(f"{models_hdfs_path}/preprocessor.pkl"):
+        print("Модели уже существуют в HDFS. Пропускаем обучение.")
 
-    url = "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data"
-    column_names = [
-        'age', 'workclass', 'fnlwgt', 'education', 'education-num',
-        'marital-status', 'occupation', 'relationship', 'race', 'sex',
-        'capital-gain', 'capital-loss', 'hours-per-week', 'native-country', 'income'
-    ]
-    df = pd.read_csv(url, header=None, names=column_names, na_values=' ?', skipinitialspace=True)
+        metrics_df = storage.read_csv(f"{models_hdfs_path}/training_metrics.csv")
+        print("Метрики существующих моделей:")
+        print(metrics_df)
+
+        return metrics_df.to_dict('records')
+
+    print("Модели не найдены в HDFS. Начинаем обучение...")
+
+    df = get_df()
 
     X = df.drop('income', axis=1)
     y = df['income'].str.strip()
@@ -84,12 +107,18 @@ def train_models():
             "F1-score": f1,
         })
 
-    joblib.dump(preprocessor, f"{models_path}/preprocessor.pkl")
-    for name, model in models.items():
-        joblib.dump(model, f"{models_path}/{name.replace(' ', '_').lower()}_model.pkl")
-
     metrics_df = pd.DataFrame(results)
-    metrics_df.to_csv(f"{models_path}/training_metrics.csv", index=False)
+
+    storage = get_storage_client()
+    models_hdfs_path = "/user/airflow/models"
+    storage.write_csv(metrics_df, f"{models_hdfs_path}/training_metrics.csv")
+
+    storage.write_joblib(preprocessor, f"{models_hdfs_path}/preprocessor.pkl")
+
+    for name, model in models.items():
+        filename = name.replace(' ', '_').lower() + "_model.pkl"
+        storage.write_joblib(model, f"{models_hdfs_path}/{filename}")
+
 
     print("Тренировка моделей окончена! Метрики:")
     print(metrics_df)

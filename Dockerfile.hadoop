@@ -1,0 +1,3 @@
+FROM harisekhon/hadoop:2.8
+
+CMD ["/bin/bash", "-c", "/entrypoint.sh & until hdfs dfs -ls /; do sleep 5; done; hdfs dfs -mkdir -p /user/airflow/datasets; hdfs dfs -chown -R airflow:supergroup /user/airflow; wait"]

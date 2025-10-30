@@ -7,5 +7,6 @@ RUN pip install --no-cache-dir -r requirements_fastapi.txt
 
 COPY fastapi_app/ ./fastapi_app/
 COPY ml_core/ ./ml_core/
+COPY storage/ ./storage/
 
 CMD ["uvicorn", "fastapi_app.__main__:app", "--host", "0.0.0.0", "--port", "8080"]

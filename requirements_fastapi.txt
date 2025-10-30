@@ -7,3 +7,4 @@ xgboost>=2.0.0
 dill==0.3.7
 pydantic==2.12.3
 pydantic-settings>=2.0.0
+hdfs
