@@ -1,2 +1,2 @@
-# Pet-DDOSDetector
-DDOSDetector — MLOps-система для детекции ботов с Airflow + FastAPI + HDFS
+# Pet-MLOps
+MLOps-система с Airflow + FastAPI + HDFS поверх AdultIncome датасета

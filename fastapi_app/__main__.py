@@ -3,9 +3,9 @@ from uvicorn import run
 from fastapi.middleware.cors import CORSMiddleware
 from urllib.parse import urlparse
 
-from config.default import DefaultSettings
-from config.utils import get_settings
-from server.handlers import list_of_routes
+from fastapi_app.config.utils import get_settings
+from fastapi_app.config.default import DefaultSettings
+from fastapi_app.server.handlers import list_of_routes
 
 
 def bind_routes(application: FastAPI, setting: DefaultSettings) -> None:
@@ -46,7 +46,7 @@ app.add_middleware(
 if __name__ == "__main__":
     settings_for_application = get_settings()
     run(
-        "__main__:app",
+        "fastapi_app.__main__:app",
         host=urlparse(settings_for_application.APP_HOST).netloc,
         port=settings_for_application.APP_PORT,
         reload=True,

@@ -1,9 +1,8 @@
 from fastapi import APIRouter, HTTPException
 import joblib
-import numpy as np
 import pandas as pd
 
-from server.schemas.predict import PredictRequest, PredictResponse
+from fastapi_app.server.schemas.predict import PredictRequest, PredictResponse
 from sklearn.exceptions import NotFittedError
 
 api_router = APIRouter(tags=["Prediction"])
@@ -14,12 +13,12 @@ PREPROCESSOR = None
 
 def load_models():
     global PREPROCESSOR
-    PREPROCESSOR = joblib.load("ai_model/preprocessor.pkl")
+    PREPROCESSOR = joblib.load("fastapi_app/ai_model/preprocessor.pkl")
 
     model_names = ["Logistic Regression", "Random Forest", "XGBoost"]
     for name in model_names:
         filename = name.replace(' ', '_').lower() + "_model.pkl"
-        MODELS[name] = joblib.load(f"ai_model/{filename}")
+        MODELS[name] = joblib.load(f"fastapi_app/ai_model/{filename}")
 
 
 load_models()

@@ -32,5 +32,8 @@ help: ##@Help Show this help
 env:  ##@Environment Create .env file with variables
 	cat example.env > .env
 
-run:
-	uv run python __main__.py
+up:
+	docker compose up --build -d
+
+down:
+	docker compose down
