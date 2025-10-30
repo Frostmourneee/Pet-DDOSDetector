@@ -16,6 +16,7 @@ def bind_routes(application: FastAPI, setting: DefaultSettings) -> None:
     for route in list_of_routes:
         application.include_router(route, prefix=setting.PATH_PREFIX)
 
+
 def get_app() -> FastAPI:
     """
     Инициализация приложения
@@ -35,6 +36,7 @@ def get_app() -> FastAPI:
     bind_routes(application, settings)
     application.state.settings = settings
     return application
+
 
 app = get_app()
 app.add_middleware(

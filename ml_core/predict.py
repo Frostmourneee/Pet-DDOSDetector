@@ -6,8 +6,10 @@ MODELS = {}
 PREPROCESSOR = None
 MODELS_LOADED = False
 
+
 def are_models_loaded():
     return MODELS_LOADED
+
 
 def load_models():
     global PREPROCESSOR, MODELS, MODELS_LOADED
@@ -22,7 +24,7 @@ def load_models():
 
         model_names = ["Logistic Regression", "Random Forest", "XGBoost"]
         for name in model_names:
-            filename = name.replace(' ', '_').lower() + "_model.pkl"
+            filename = name.replace(" ", "_").lower() + "_model.pkl"
             MODELS[name] = storage.read_joblib(f"{models_hdfs_path}/{filename}")
 
         MODELS_LOADED = True
@@ -36,7 +38,9 @@ def load_models():
 def predict(input_data: dict, model_name: str = "Random Forest"):
     """Предсказание дохода"""
     if model_name not in MODELS:
-        raise ValueError(f"Модель '{model_name}' не найдена. Доступные: {list(MODELS.keys())}")
+        raise ValueError(
+            f"Модель '{model_name}' не найдена. Доступные: {list(MODELS.keys())}"
+        )
 
     df = pd.DataFrame([input_data])
     X_transformed = PREPROCESSOR.transform(df)
@@ -48,5 +52,5 @@ def predict(input_data: dict, model_name: str = "Random Forest"):
     return {
         "model_used": model_name,
         "predict": int(result),
-        "proba": float(result_proba)
+        "proba": float(result_proba),
     }

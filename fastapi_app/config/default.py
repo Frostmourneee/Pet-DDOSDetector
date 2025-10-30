@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings
 
 load_dotenv()
 
+
 class DefaultSettings(BaseSettings):
     """
     Default configs for application.

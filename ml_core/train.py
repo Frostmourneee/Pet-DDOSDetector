@@ -3,8 +3,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (accuracy_score, f1_score, precision_score,
-                             recall_score)
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -21,17 +20,34 @@ def get_df():
     if storage.file_exists(hdfs_path):
         return storage.read_csv(hdfs_path)
     else:
-        url = "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data"
+        url = (
+            "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data"
+        )
         column_names = [
-            'age', 'workclass', 'fnlwgt', 'education', 'education-num',
-            'marital-status', 'occupation', 'relationship', 'race', 'sex',
-            'capital-gain', 'capital-loss', 'hours-per-week', 'native-country', 'income'
+            "age",
+            "workclass",
+            "fnlwgt",
+            "education",
+            "education-num",
+            "marital-status",
+            "occupation",
+            "relationship",
+            "race",
+            "sex",
+            "capital-gain",
+            "capital-loss",
+            "hours-per-week",
+            "native-country",
+            "income",
         ]
-        df = pd.read_csv(url, header=None, names=column_names, na_values=' ?', skipinitialspace=True)
+        df = pd.read_csv(
+            url, header=None, names=column_names, na_values=" ?", skipinitialspace=True
+        )
 
         storage.write_csv(df, hdfs_path)
 
         return df
+
 
 def train_models():
     """Основная функция обучения моделей"""
@@ -46,14 +62,14 @@ def train_models():
         print("Метрики существующих моделей:")
         print(metrics_df)
 
-        return metrics_df.to_dict('records')
+        return metrics_df.to_dict("records")
 
     print("Модели не найдены в HDFS. Начинаем обучение...")
 
     df = get_df()
 
-    X = df.drop('income', axis=1)
-    y = df['income'].str.strip()
+    X = df.drop("income", axis=1)
+    y = df["income"].str.strip()
     y = (y == ">50K").astype(int)
 
     cat_features = X.select_dtypes(include=["category", "object"]).columns
@@ -63,7 +79,12 @@ def train_models():
         [
             (
                 "num",
-                Pipeline([("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]),
+                Pipeline(
+                    [
+                        ("imputer", SimpleImputer(strategy="median")),
+                        ("scaler", StandardScaler()),
+                    ]
+                ),
                 num_features,
             ),
             (
@@ -85,10 +106,19 @@ def train_models():
     )
 
     models = {
-        "Logistic Regression": LogisticRegression(random_state=RANDOM_STATE, max_iter=1000),
-        "Random Forest": RandomForestClassifier(n_estimators=100, random_state=RANDOM_STATE, n_jobs=-1),
-        "XGBoost": XGBClassifier(n_estimators=100, random_state=RANDOM_STATE, use_label_encoder=False,
-                                 eval_metric="logloss", n_jobs=-1)
+        "Logistic Regression": LogisticRegression(
+            random_state=RANDOM_STATE, max_iter=1000
+        ),
+        "Random Forest": RandomForestClassifier(
+            n_estimators=100, random_state=RANDOM_STATE, n_jobs=-1
+        ),
+        "XGBoost": XGBClassifier(
+            n_estimators=100,
+            random_state=RANDOM_STATE,
+            use_label_encoder=False,
+            eval_metric="logloss",
+            n_jobs=-1,
+        ),
     }
 
     results = []
@@ -101,13 +131,15 @@ def train_models():
         rec = recall_score(y_test, y_pred)
         f1 = f1_score(y_test, y_pred)
 
-        results.append({
-            "Model": name,
-            "Accuracy": acc,
-            "Precision": prec,
-            "Recall": rec,
-            "F1-score": f1,
-        })
+        results.append(
+            {
+                "Model": name,
+                "Accuracy": acc,
+                "Precision": prec,
+                "Recall": rec,
+                "F1-score": f1,
+            }
+        )
 
     metrics_df = pd.DataFrame(results)
 
@@ -118,9 +150,8 @@ def train_models():
     storage.write_joblib(preprocessor, f"{models_hdfs_path}/preprocessor.pkl")
 
     for name, model in models.items():
-        filename = name.replace(' ', '_').lower() + "_model.pkl"
+        filename = name.replace(" ", "_").lower() + "_model.pkl"
         storage.write_joblib(model, f"{models_hdfs_path}/{filename}")
-
 
     print("Тренировка моделей окончена! Метрики:")
     print(metrics_df)

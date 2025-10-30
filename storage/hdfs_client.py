@@ -8,8 +8,8 @@ from hdfs.util import HdfsError
 
 
 class HDFSClient:
-    def __init__(self, host='hadoop', webhdfs_port=50070):
-        self.client = InsecureClient(f'http://{host}:{webhdfs_port}')
+    def __init__(self, host="hadoop", webhdfs_port=50070):
+        self.client = InsecureClient(f"http://{host}:{webhdfs_port}")
         print(f"HDFS клиент инициализирован для {host}:{webhdfs_port}")
 
     def read_csv(self, hdfs_path):
@@ -17,7 +17,7 @@ class HDFSClient:
         try:
             with self.client.read(hdfs_path) as reader:
                 return pd.read_csv(reader)
-        except HdfsError as e:
+        except HdfsError:
             print(f"Файл не найден в HDFS: {hdfs_path}")
             raise
         except Exception as e:
@@ -28,7 +28,9 @@ class HDFSClient:
         """Загрузка DataFrame в HDFS как CSV"""
         tmp_file = None
         try:
-            tmp_file = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv')
+            tmp_file = tempfile.NamedTemporaryFile(
+                mode="w", delete=False, suffix=".csv"
+            )
             df.to_csv(tmp_file.name, index=False, header=False)
             tmp_file.close()
 
@@ -54,7 +56,7 @@ class HDFSClient:
         """Сохранение объекта через joblib в HDFS"""
         tmp_path = None
         try:
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.pkl') as tmp_file:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pkl") as tmp_file:
                 tmp_path = tmp_file.name
             joblib.dump(obj, tmp_path)
             self.client.upload(hdfs_path, tmp_path, overwrite=True)
@@ -72,7 +74,7 @@ class HDFSClient:
     def read_joblib(self, hdfs_path):
         tmp_path = None
         try:
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.pkl') as tmp_file:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pkl") as tmp_file:
                 tmp_path = tmp_file.name
             self.client.download(hdfs_path, tmp_path, overwrite=True)
             return joblib.load(tmp_path)
