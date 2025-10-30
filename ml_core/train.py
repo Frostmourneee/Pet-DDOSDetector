@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
@@ -12,8 +14,8 @@ from xgboost import XGBClassifier
 from storage import get_storage_client
 
 
-def get_df():
-    """Загрузка датасета из HDFS или скачивание из источника"""
+def get_df() -> pd.DataFrame:
+    """Загрузка датасета из HDFS или скачивание из источника."""
     storage = get_storage_client()
     hdfs_path = "/user/airflow/datasets/adult_income/adult.data"
 
@@ -49,8 +51,12 @@ def get_df():
         return df
 
 
-def train_models():
-    """Основная функция обучения моделей"""
+def train_models() -> List[Dict[str, Any]]:
+    """Основная функция обучения моделей.
+
+    Returns:
+        Список словарей с метриками для каждой обученной модели
+    """
     RANDOM_STATE = 42
 
     storage = get_storage_client()

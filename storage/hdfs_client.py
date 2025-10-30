@@ -1,5 +1,6 @@
 import os
 import tempfile
+from typing import Any, Optional
 
 import joblib
 import pandas as pd
@@ -8,12 +9,12 @@ from hdfs.util import HdfsError
 
 
 class HDFSClient:
-    def __init__(self, host="hadoop", webhdfs_port=50070):
+    def __init__(self, host: str = "hadoop", webhdfs_port: int = 50070) -> None:
         self.client = InsecureClient(f"http://{host}:{webhdfs_port}")
         print(f"HDFS клиент инициализирован для {host}:{webhdfs_port}")
 
-    def read_csv(self, hdfs_path):
-        """Чтение CSV из HDFS в pandas DataFrame"""
+    def read_csv(self, hdfs_path: str) -> pd.DataFrame:
+        """Чтение CSV из HDFS в pandas DataFrame."""
         try:
             with self.client.read(hdfs_path) as reader:
                 return pd.read_csv(reader)
@@ -24,9 +25,9 @@ class HDFSClient:
             print(f"Ошибка чтения из HDFS {hdfs_path}: {e}")
             raise
 
-    def write_csv(self, df, hdfs_path):
-        """Загрузка DataFrame в HDFS как CSV"""
-        tmp_file = None
+    def write_csv(self, df: pd.DataFrame, hdfs_path: str) -> None:
+        """Загрузка DataFrame в HDFS как CSV."""
+        tmp_file: Optional[str] = None
         try:
             tmp_file = tempfile.NamedTemporaryFile(
                 mode="w", delete=False, suffix=".csv"
@@ -44,17 +45,17 @@ class HDFSClient:
             if tmp_file and os.path.exists(tmp_file.name):
                 os.unlink(tmp_file.name)
 
-    def file_exists(self, hdfs_path):
-        """Проверка существования файла в HDFS"""
+    def file_exists(self, hdfs_path: str) -> bool:
+        """Проверка существования файла в HDFS."""
         try:
             self.client.status(hdfs_path)
             return True
         except HdfsError:
             return False
 
-    def write_joblib(self, obj, hdfs_path):
-        """Сохранение объекта через joblib в HDFS"""
-        tmp_path = None
+    def write_joblib(self, obj: Any, hdfs_path: str) -> None:
+        """Сохранение объекта через joblib в HDFS."""
+        tmp_path: Optional[str] = None
         try:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pkl") as tmp_file:
                 tmp_path = tmp_file.name
@@ -71,8 +72,9 @@ class HDFSClient:
                 except OSError:
                     pass
 
-    def read_joblib(self, hdfs_path):
-        tmp_path = None
+    def read_joblib(self, hdfs_path: str) -> Any:
+        """Чтение объекта из HDFS через joblib."""
+        tmp_path: Optional[str] = None
         try:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pkl") as tmp_file:
                 tmp_path = tmp_file.name
