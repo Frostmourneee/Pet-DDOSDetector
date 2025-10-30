@@ -1,6 +1,4 @@
 import pandas as pd
-
-from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
@@ -13,13 +11,24 @@ from xgboost import XGBClassifier
 import joblib
 import os
 
-def main():
-    os.makedirs("ai_model", exist_ok=True)
+
+def train_models():
+    """Основная функция обучения моделей"""
     RANDOM_STATE = 42
 
+    os.makedirs("/opt/airflow/ml_core/trained_models", exist_ok=True)
+    models_path = "/opt/airflow/ml_core/trained_models"
 
-    data = fetch_openml("adult", version=2, as_frame=True)
-    X, y = data.data, data.target
+    url = "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data"
+    column_names = [
+        'age', 'workclass', 'fnlwgt', 'education', 'education-num',
+        'marital-status', 'occupation', 'relationship', 'race', 'sex',
+        'capital-gain', 'capital-loss', 'hours-per-week', 'native-country', 'income'
+    ]
+    df = pd.read_csv(url, header=None, names=column_names, na_values=' ?', skipinitialspace=True)
+
+    X = df.drop('income', axis=1)
+    y = df['income'].str.strip()
     y = (y == ">50K").astype(int)
 
     cat_features = X.select_dtypes(include=["category", "object"]).columns
@@ -46,7 +55,6 @@ def main():
     )
 
     X_processed = preprocessor.fit_transform(X)
-
     X_train, X_test, y_train, y_test = train_test_split(
         X_processed, y, test_size=0.2, random_state=RANDOM_STATE, stratify=y
     )
@@ -54,14 +62,13 @@ def main():
     models = {
         "Logistic Regression": LogisticRegression(random_state=RANDOM_STATE, max_iter=1000),
         "Random Forest": RandomForestClassifier(n_estimators=100, random_state=RANDOM_STATE, n_jobs=-1),
-        "XGBoost": XGBClassifier(n_estimators=100, random_state=RANDOM_STATE, use_label_encoder=False, eval_metric="logloss", n_jobs=-1)
+        "XGBoost": XGBClassifier(n_estimators=100, random_state=RANDOM_STATE, use_label_encoder=False,
+                                 eval_metric="logloss", n_jobs=-1)
     }
 
     results = []
-
     for name, model in models.items():
         model.fit(X_train, y_train)
-
         y_pred = model.predict(X_test)
 
         acc = accuracy_score(y_test, y_pred)
@@ -72,12 +79,19 @@ def main():
         results.append({
             "Model": name,
             "Accuracy": acc,
-            "Precision (macro)": prec,
-            "Recall (macro)": rec,
-            "F1-score (macro)": f1,
+            "Precision": prec,
+            "Recall": rec,
+            "F1-score": f1,
         })
 
-    joblib.dump(preprocessor, "ai_model/preprocessor.pkl")
-
+    joblib.dump(preprocessor, f"{models_path}/preprocessor.pkl")
     for name, model in models.items():
-        joblib.dump(model, f"ai_model/{name.replace(' ', '_').lower()}_model.pkl")
+        joblib.dump(model, f"{models_path}/{name.replace(' ', '_').lower()}_model.pkl")
+
+    metrics_df = pd.DataFrame(results)
+    metrics_df.to_csv(f"{models_path}/training_metrics.csv", index=False)
+
+    print("Training completed! Metrics:")
+    print(metrics_df)
+
+    return results
