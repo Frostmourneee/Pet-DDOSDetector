@@ -10,21 +10,21 @@ from server.handlers import list_of_routes
 
 def bind_routes(application: FastAPI, setting: DefaultSettings) -> None:
     """
-    Bind all routes to application.
+    Биндит все апи-руты
     """
     for route in list_of_routes:
         application.include_router(route, prefix=setting.PATH_PREFIX)
 
 def get_app() -> FastAPI:
     """
-    Creates application and all dependable objects.
+    Инициализация приложения
     """
-    description = "DDOSDetector — MLOps-система для обнаружения ботов с Airflow + FastAPI + HDFS"
+    description = "MLOps-система с Airflow + FastAPI + HDFS поверх AdultIncome датасета"
 
     tags_metadata = []
 
     application = FastAPI(
-        title="DDOSDetector",
+        title="MLOps",
         description=description,
         openapi_url="/openapi",
         version="1.0.0",

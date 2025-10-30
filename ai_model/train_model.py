@@ -10,7 +10,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from xgboost import XGBClassifier
-
+import joblib
 
 RANDOM_STATE = 42
 
@@ -62,9 +62,9 @@ for name, model in models.items():
     y_pred = model.predict(X_test)
 
     acc = accuracy_score(y_test, y_pred)
-    prec = precision_score(y_test, y_pred, average="macro")
-    rec = recall_score(y_test, y_pred, average="macro")
-    f1 = f1_score(y_test, y_pred, average="macro")
+    prec = precision_score(y_test, y_pred)
+    rec = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
 
     results.append({
         "Model": name,
@@ -73,3 +73,8 @@ for name, model in models.items():
         "Recall (macro)": rec,
         "F1-score (macro)": f1,
     })
+
+joblib.dump(preprocessor, "ai_model/preprocessor.pkl")
+
+for name, model in models.items():
+    joblib.dump(model, f"ai_model/{name.replace(' ', '_').lower()}_model.pkl")
